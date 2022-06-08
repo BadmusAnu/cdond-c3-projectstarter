@@ -328,7 +328,7 @@ jobs:
           id: ${CIRCLE_WORKFLOW_ID:0:5}
       - revert-migrations:
           id: ${CIRCLE_WORKFLOW_ID:0:5} 
-cleanup:
+  cleanup:
     docker:
       - image: amazon/aws-cli
     steps:
@@ -347,9 +347,13 @@ cleanup:
           command: |
             if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
             then
-              aws s3 rm ""
-              s
+              aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
+              aws cloudformation delete-stack --stack-name "frontend-infra-${OldWorkflowID}"
+              aws cloudformation delete-stack --stack-name "backend-infra-${OldWorkflowID}"
+            else
+              echo "$OldWorkflowID==$CurrentWorkflowID => nothing needs to be done..."
             fi
+            
             
 
 workflows:
