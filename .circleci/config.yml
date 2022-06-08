@@ -1,7 +1,7 @@
 version: 2.1
 
 commands:
-  destroy_environment:
+  destroy-environment:
     description: Destroy Cloud Formation Stacks and infrastructure
     parameters:
       id:
@@ -294,10 +294,10 @@ jobs:
             else
               return 1
             fi
-      - destroy-enviroment
+      - destroy-environment:
           id: ${CIRCLE_WORKFLOW_ID:0:5}
-      - revert-migrations
-          id: ${CIRCLE_WORKFLOW_ID:0:5}  
+      - revert-migrations:
+          id: ${CIRCLE_WORKFLOW_ID:0:5} 
 
   cloudfront-update:
     docker:
@@ -324,10 +324,10 @@ jobs:
               --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}" \
               --tags project=udapeople
 
-      - destroy-enviroment
+      - destroy-environment:
           id: ${CIRCLE_WORKFLOW_ID:0:5}
-      - revert-migrations
-          id: ${CIRCLE_WORKFLOW_ID:0:5}
+      - revert-migrations:
+          id: ${CIRCLE_WORKFLOW_ID:0:5} 
 cleanup:
     docker:
       - image: amazon/aws-cli
