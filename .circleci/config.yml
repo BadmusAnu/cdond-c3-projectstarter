@@ -118,7 +118,7 @@ jobs:
           name: frontend scan
           command: |
              cd frontend
-             npm audit
+             npm audit --audit-level=critica
 
   scan-backend:
     docker:
@@ -131,7 +131,7 @@ jobs:
           name: backend scan
           command: |
              cd backend
-             npm audit
+             npm audit --audit-level=critica
 
 
   deploy-infrastructure:
@@ -274,11 +274,11 @@ jobs:
           command: |
             BACKEND IP = aws cloudformation list-exports | grep BACKEND_IP
             export API_URL="http://${BACKEND_IP}:3030"
+            export API_URL_STATUS = "http://${BACKEND_IP}:3030/api/status"
       - run:
           name: Backend smoke test.
           command: |
-          API_URL= "http://${BACKEND_IP}:3030/api/status/"
-          if curl -s --head ${URL} 
+          if curl -s --head ${API_URL_STATUS} 
           then
             return 0
           else
@@ -295,7 +295,9 @@ jobs:
             return 1
           fi
       - destroy-enviroment
-      - revert-migrations  
+          id: ${CIRCLE_WORKFLOW_ID:0:5}
+      - revert-migrations
+          id: ${CIRCLE_WORKFLOW_ID:0:5}  
 
   cloudfront-update:
     docker:
@@ -323,7 +325,9 @@ jobs:
               --tags project=udapeople
 
       - destroy-enviroment
-      - revert-migrations 
+          id: ${CIRCLE_WORKFLOW_ID:0:5}
+      - revert-migrations
+          id: ${CIRCLE_WORKFLOW_ID:0:5}
 cleanup:
     docker:
       - image: amazon/aws-cli
