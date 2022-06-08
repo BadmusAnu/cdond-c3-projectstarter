@@ -278,22 +278,22 @@ jobs:
       - run:
           name: Backend smoke test.
           command: |
-          if [curl ${API_URL_STATUS} | grep "OK"] 
-          then
-            return 0
-          else
-            return 1
-          fi
+            if curl -s --head ${API_URL_STATUS}
+            then
+              return 0
+            else
+              return 1
+            fi
       - run:
           name: Frontend smoke test.
           command: |
-          URL= "https://udapeople-${CIRCLE_WORKFLOW_ID:0:5}.s3.amazonaws.com/"
-          if curl -s --head ${URL} | grep "Welcome"
-          then
-            return 0
-          else
-            return 1
-          fi
+            URL= "https://udapeople-${CIRCLE_WORKFLOW_ID:0:5}.s3.amazonaws.com/"
+            if curl -s --head ${URL} | grep "Welcome"
+            then
+              return 0
+            else
+              return 1
+            fi
       - destroy-enviroment
           id: ${CIRCLE_WORKFLOW_ID:0:5}
       - revert-migrations
