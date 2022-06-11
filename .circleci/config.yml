@@ -158,7 +158,7 @@ jobs:
             aws cloudformation deploy \
               --template-file .circleci/files/frontend.yml \
               --tags project=udapeople-frontend \
-              --stack-name "frontend-infra-${CIRCLE_WORKFLOW_ID:0:5}" \
+              --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:5}" \
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:5}"  
             
       - run:
@@ -167,7 +167,7 @@ jobs:
             
             aws ec2 describe-instances \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
-              #add tags for filter
+              --filters "Name=tag:Project,Values=udapeople" \
               --output text >> inventory
 
       - persist_to_workspace:
