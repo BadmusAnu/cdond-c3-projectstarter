@@ -175,9 +175,9 @@ jobs:
             
             cat .circleci/ansible/inventory.txt
       - persist_to_workspace:
-          root: .
+          root: ~/
           paths:
-            - inventory.txt
+            - project/.circleci/ansible/inventory.txt
 
   configure-infrastructure:
     docker:
@@ -187,7 +187,7 @@ jobs:
       - add_ssh_keys:
           fingerprints: ["cb:a4:a2:c3:ae:5e:be:7a:bb:5d:bd:ba:74:bf:2f:94"] 
       - attach_workspace:
-          at: ./inventory.txt
+          at: project/.circleci/ansible/inventory.txt
       - run:
           name: Install Ansible
           command: |
