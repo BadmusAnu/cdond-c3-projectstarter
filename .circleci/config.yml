@@ -171,7 +171,7 @@ jobs:
             aws ec2 describe-instances \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --filters "Name=tag:project,Values=udapeople-backend" \
-              --output text >> inventory.txt
+              --output text >> .circleci/ansible/inventory.txt
             
             cat inventory.txt
       - persist_to_workspace:
@@ -195,7 +195,6 @@ jobs:
       - run:
           name: Run Playbook and Configure server
           command: |
-            
             ansible-playbook -i inventory.txt .circleci/ansible/configure-server.yml
          
 
