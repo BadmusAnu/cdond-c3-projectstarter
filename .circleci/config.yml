@@ -172,6 +172,7 @@ jobs:
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --filters "Name=tag:project,Values=udapeople-backend" \
               --output text >> inventory.txt
+            
             cat inventory.txt
       - save_cache:
           paths:
@@ -208,7 +209,7 @@ jobs:
           name: Run migrations
           command: |
              cd  backend
-             npm install
+             npm i
              npm run migrations > migrations_dump.txt
       - run:
           name: Send migration results to kvdB
