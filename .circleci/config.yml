@@ -191,14 +191,12 @@ jobs:
           at: .
       - run:
           name: Install Ansible
-          working_directory: ./.circleci/ansible
           command: |
             apk add --update ansible
       - run:
           name: Run Playbook and Configure server
-           working_directory: ./.circleci/ansible
           command: |
-            ansible-playbook -i inventory.txt .circleci/ansible/configure-server.yml
+            ansible-playbook -i ./.circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
          
 
   run-migrations:
