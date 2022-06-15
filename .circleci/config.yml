@@ -215,7 +215,7 @@ jobs:
       - run:
           name: Send migration results to kvdB
           command: |
-            if grep -q "has been executed successfully" migration_dump.txt
+            if grep -q "has been executed successfully" migrations_dump.txt
             then
               echo "DB migration was successful, will update kvdb..."
               curl https://kvdb.io/NnowyGhYzJyAAsC8uqaBvW/udacity -d 'success'
