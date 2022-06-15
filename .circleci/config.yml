@@ -218,10 +218,10 @@ jobs:
             if grep -q "has been executed successfully" ~/project/backend/migrations_dump.txt
             then
               echo "DB migration was successful, will update kvdb..."
-              curl https://kvdb.io/NnowyGhYzJyAAsC8uqaBvW/udacity -d 'success'
+              curl -k https://kvdb.io/NnowyGhYzJyAAsC8uqaBvW/udacity -d 'success'
             else
               echo "DB migration failed, please verify setup! Probably the database already exists. Verify setup!"
-              curl https://kvdb.io/NnowyGhYzJyAAsC8uqaBvW/udacity -d 'failure'
+              curl -k https://kvdb.io/NnowyGhYzJyAAsC8uqaBvW/udacity -d 'failure'
             fi
             echo "WorkflowID=${CIRCLE_WORKFLOW_ID:0:5}"
            
@@ -242,10 +242,11 @@ jobs:
       - run:
           name: Get backend url
           command: |
-            BACKEND IP = aws cloudformation list-exports | grep BACKEND_IP
+            export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:project,Values=udapeople-backend")
             export API_URL="http://${BACKEND_IP}:3030"
-            echo "${API_URL}"
-            npm run build
+            echo "API_URL = ${API_URL}"
+            echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
+            cat frontend/.env
             
             
       - run:
