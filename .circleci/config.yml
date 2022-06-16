@@ -238,7 +238,8 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       - checkout
-
+      - restore_cache:
+          keys: [frontend-build]      
       - run:
           name: Install AWS CLI dependencies
           working_directory: /tmp
@@ -260,6 +261,7 @@ jobs:
           name: baking-in back-end ip
           command: |            
             cd frontend 
+            npm i
             npm run build
             
             
@@ -284,13 +286,23 @@ jobs:
           fingerprints: ["cb:a4:a2:c3:ae:5e:be:7a:bb:5d:bd:ba:74:bf:2f:94"] 
       - attach_workspace:
           at: .
+
       - run:
           name: Install dependencies
+          working_directory: /tmp
           command: |
-            apk add --update ansible
+            apk add --update ansible curl rsync openssh nodejs npm
+            ansible --version
+            pip install awscli
+            aws --version
       - run:
           name: Deploy backend
           command: |
+            cd backend
+            npm i
+            npm run build
+            cd ..
+            tar -C backend -czvf artifact.tar.gz .
             ansible-playbook -i ./.circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml
       
 
