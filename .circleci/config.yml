@@ -180,9 +180,6 @@ jobs:
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:5}
           
-      - revert_migrations:
-          id: ${CIRCLE_WORKFLOW_ID:0:5}
-          
                   
 
   configure-infrastructure:
@@ -232,8 +229,6 @@ jobs:
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:5}
           
-      - revert_migrations:
-          id: ${CIRCLE_WORKFLOW_ID:0:5}
           
                   
            
@@ -249,7 +244,7 @@ jobs:
       - run:
           name: Get backend url
           command: |
-            export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:project,Values=udapeople-backend")
+            export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:project,Values=udapeople-backend" --output text)
             export API_URL="http://${BACKEND_IP}:3030"
             echo "API_URL = ${API_URL}"
             echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
@@ -259,13 +254,11 @@ jobs:
       - run:
           name: Deploy frontend objects
           command: |
-            aws s3 cp frontend/dist "s3://udapeople-${CIRCLE_WORKFLOW_ID:0:5}" --recursive
+            aws s3 cp ./.circleci/ansible/frontend/dist "s3://udapeople-${CIRCLE_WORKFLOW_ID:0:5}" --recursive
       
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:5}
           
-      - revert_migrations:
-          id: ${CIRCLE_WORKFLOW_ID:0:5}
           
       
          
@@ -278,7 +271,7 @@ jobs:
       - add_ssh_keys:
           fingerprints: ["cb:a4:a2:c3:ae:5e:be:7a:bb:5d:bd:ba:74:bf:2f:94"] 
       - attach_workspace:
-          at: project/.circleci/ansible/inventory.txt
+          at: .
       - run:
           name: Install dependencies
           command: |
@@ -286,7 +279,7 @@ jobs:
       - run:
           name: Deploy backend
           command: |
-            ansible-playbook -i project/.circleci/ansible/inventory.txt ./ansible/deploy-backend.yml
+            ansible-playbook -i ./.circleci/ansible/inventory.txt ./ansible/deploy-backend.yml
       
 
   smoke-test:
