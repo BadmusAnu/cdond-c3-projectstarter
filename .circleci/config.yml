@@ -235,11 +235,18 @@ jobs:
 
   deploy-frontend:
     docker:
-      - image: amazon/aws-cli
+      - image: circleci/node:13.8.0
     steps:
       - checkout
-      - restore_cache:
-           key: frontend-dist
+
+      - run:
+          name: Install AWS CLI dependencies
+          working_directory: /tmp
+          command: |
+            sudo apt-get update && sudo apt-get install -yy less
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
       
       - run:
           name: Get backend url
@@ -249,12 +256,17 @@ jobs:
             echo "API_URL = ${API_URL}"
             echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
             cat frontend/.env
+      - run:
+          name: baking-in back-end ip
+          command: |            
+            cd frontend 
+            npm run build
             
             
       - run:
           name: Deploy frontend objects
           command: |
-            aws s3 cp ./.circleci/ansible/frontend/dist "s3://udapeople-${CIRCLE_WORKFLOW_ID:0:5}" --recursive
+            aws s3 cp ./dist "s3://udapeople-${CIRCLE_WORKFLOW_ID:0:5}" --recursive
       
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:5}
@@ -279,7 +291,7 @@ jobs:
       - run:
           name: Deploy backend
           command: |
-            ansible-playbook -i ./.circleci/ansible/inventory.txt ./ansible/deploy-backend.yml
+            ansible-playbook -i ./.circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml
       
 
   smoke-test:
