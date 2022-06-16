@@ -26,5 +26,4 @@
     TYPEORM_DATABASE: "{{ lookup('env', 'TYPEORM_DATABASE') }}"
 
   roles:
-    - including_vars
     - deploy
