@@ -1,7 +1,7 @@
 version: 2.1
 
 commands:
-  destroy-environment:
+  destroy_environment:
     description: Destroy Cloud Formation Stacks and infrastructure
     parameters:
       id:
@@ -22,7 +22,7 @@ commands:
           when: on_fail
             
 
-  revert-migrations:
+  revert_migrations:
     description: Revert the last migration if successfully run in the current workflow.
     parameters:
       id:
