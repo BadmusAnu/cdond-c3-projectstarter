@@ -19,8 +19,6 @@ commands:
           command: |
             aws s3 rm s3://udapeople-<< parameters.id >> --recursive
             aws cloudformation delete-stack --stack-name frontend-infra-<< parameters.id >>
-          environment:
-              TERM: xterm-256color
           when: on_fail
             
 
@@ -179,6 +177,13 @@ jobs:
           root: .
           paths:
             - .circleci/ansible/inventory.txt
+      - destroy_environment:
+          id: ${CIRCLE_WORKFLOW_ID:0:7}
+          when: on_fail
+      - revert_migrations:
+          id: ${CIRCLE_WORKFLOW_ID:0:7}
+          when: on_fail
+                  
 
   configure-infrastructure:
     docker:
@@ -224,6 +229,13 @@ jobs:
               curl -k https://kvdb.io/NnowyGhYzJyAAsC8uqaBvW/udacity -d 'failure'
             fi
             echo "WorkflowID=${CIRCLE_WORKFLOW_ID:0:5}"
+      - destroy_environment:
+          id: ${CIRCLE_WORKFLOW_ID:0:7}
+          when: on_fail
+      - revert_migrations:
+          id: ${CIRCLE_WORKFLOW_ID:0:7}
+          when: on_fail
+                  
            
 
   deploy-frontend:
@@ -231,11 +243,6 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - checkout
-      - run:
-          name: Install dependencies
-          command: |
-            sudo apt-get update
-      
       - restore_cache:
            key: frontend-dist
       
@@ -253,6 +260,14 @@ jobs:
           name: Deploy frontend objects
           command: |
             aws s3 cp frontend/dist "s3://udapeople-${CIRCLE_WORKFLOW_ID:0:5}" --recursive
+      
+      - destroy_environment:
+          id: ${CIRCLE_WORKFLOW_ID:0:7}
+          when: on_fail
+      - revert_migrations:
+          id: ${CIRCLE_WORKFLOW_ID:0:7}
+          when: on_fail
+      
          
                     
   deploy-backend:
