@@ -370,8 +370,7 @@ jobs:
       - checkout
       - run:
           name: Install dependencies
-          command: |
-            apt install -y tar gzip curl
+          command: yum install -y tar gzip nodejs npm
       - run:
           name: Update cloudfront distribution
           command: |   
