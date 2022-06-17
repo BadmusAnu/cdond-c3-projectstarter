@@ -30,9 +30,8 @@ commands:
           name: Revert migrations
           when: on_fail
           command: |
-            curl --insecure  https://kvdb.io/NnowyGhYzJyAAsC8uqaBvW/udacity
-            success = 1
-            if(( $success==1 )); 
+            SUCCESS=$(curl --insecure  https://kvdb.io/NnowyGhYzJyAAsC8uqaBvW/udacity)
+            if(( $SUCCESS==success )); 
             then
               cd ~/project/backend
               npm install
@@ -372,7 +371,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apt-get install -y tar gzip curl
+            apt install -y tar gzip curl
       - run:
           name: Update cloudfront distribution
           command: |   
