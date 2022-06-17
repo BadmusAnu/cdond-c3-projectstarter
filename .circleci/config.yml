@@ -317,37 +317,36 @@ jobs:
       - checkout
       - run:
           name: Install dependencies
+          working_directory: /tmp
           command: |
-            - run: apk add --update curl
+            apk add --update curl nodejs npm
+            pip install awscli
+
       - run:
           name: Get backend url
           command: |
-            BACKEND IP = aws cloudformation list-exports | grep BACKEND_IP
+            export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:project,Values=udapeople-backend" --output text)
             export API_URL="http://${BACKEND_IP}:3030"
-            export API_URL_STATUS = "http://${BACKEND_IP}:3030/api/status"
-      - run:
-          name: Backend smoke test.
-          command: |
-            if curl -s --head ${API_URL_STATUS}
+            echo "${API_URL}"
+            if curl "${API_URL}/api/status" | grep "ok"
             then
               return 0
             else
               return 1
             fi
+
       - run:
           name: Frontend smoke test.
           command: |
-            URL= "https://udapeople-${CIRCLE_WORKFLOW_ID:0:5}.s3.amazonaws.com/"
-            if curl -s --head ${URL} | grep "Welcome"
+            URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-us-east-1.amazonaws.com/#/employees"            
+            echo ${URL} 
+            if curl -s ${URL} | grep "Welcome"
             then
               return 0
             else
               return 1
             fi
-      - destroy_environment:
-          id: ${CIRCLE_WORKFLOW_ID:0:5}
-      - revert_migrations:
-          id: ${CIRCLE_WORKFLOW_ID:0:5} 
+
 
   cloudfront-update:
     docker:
@@ -432,8 +431,8 @@ workflows:
           requires: [run-migrations]
       - deploy-backend:
           requires: [run-migrations]
-      # - smoke-test:
-      #     requires: [deploy-backend, deploy-frontend]
+      - smoke-test:
+          requires: [deploy-backend, deploy-frontend]
       # - cloudfront-update:
       #     requires: [smoke-test]
       # - cleanup:
