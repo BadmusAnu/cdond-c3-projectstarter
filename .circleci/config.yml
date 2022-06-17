@@ -306,7 +306,6 @@ jobs:
             npm run build
             cd ..
             cat ./.circleci/ansible/inventory.txt
-            tar -C backend -czvf artifact.tar.gz .
             export ANSIBLE_HOST_KEY_CHECKING=False
             ansible-playbook -i ./.circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml --ssh-common-args='-o StrictHostKeyChecking=no'
       
