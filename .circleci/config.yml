@@ -10,15 +10,13 @@ commands:
       - run:
           name: Destroy backend cfn stack
           command: |
-            aws cloudformation delete-stack --stack-name backend-infra-<< parameters.id >>
-          environment:
-            TERM: xterm-256color
+            aws cloudformation delete-stack --stack-name udapeople-backend-<< parameters.id >>
           when: on_fail
       - run:
           name: Destroy frontend cfn stack and S3 bucket
           command: |
             aws s3 rm s3://udapeople-<< parameters.id >> --recursive
-            aws cloudformation delete-stack --stack-name frontend-infra-<< parameters.id >>
+            aws cloudformation delete-stack --stack-name udapeople-frontend-<< parameters.id >>
           when: on_fail
             
 
@@ -32,11 +30,12 @@ commands:
           name: Revert migrations
           when: on_fail
           command: |
-            curl https://kvdb.io/NnowyGhYzJyAAsC8uqaBvW/udacity
+            curl --insecure  https://kvdb.io/NnowyGhYzJyAAsC8uqaBvW/udacity
             success = 1
             if(( $success==1 )); 
             then
               cd ~/project/backend
+              npm install
               npm run migrations:revert
             fi
             
@@ -177,8 +176,11 @@ jobs:
           root: .
           paths:
             - .circleci/ansible/inventory.txt
+      
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:5}
+      - revert_migrations:
+          id: ${CIRCLE_WORKFLOW_ID:0:5}    
           
                   
 
@@ -199,6 +201,11 @@ jobs:
           name: Run Playbook and Configure server
           command: |
             ansible-playbook -i ./.circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
+      
+      - destroy_environment:
+          id: ${CIRCLE_WORKFLOW_ID:0:5}
+      - revert_migrations:
+          id: ${CIRCLE_WORKFLOW_ID:0:5}    
          
 
   run-migrations:
@@ -227,12 +234,12 @@ jobs:
               curl -k https://kvdb.io/NnowyGhYzJyAAsC8uqaBvW/udacity -d 'failure'
             fi
             echo "WorkflowID=${CIRCLE_WORKFLOW_ID:0:5}"
+      
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:5}
-          
-          
-                  
-           
+      - revert_migrations:
+          id: ${CIRCLE_WORKFLOW_ID:0:5}
+      
 
   deploy-frontend:
     docker:
@@ -274,6 +281,8 @@ jobs:
       
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:5}
+      - revert_migrations:
+          id: ${CIRCLE_WORKFLOW_ID:0:5}    
           
           
       
@@ -308,7 +317,11 @@ jobs:
             cat ./.circleci/ansible/inventory.txt
             export ANSIBLE_HOST_KEY_CHECKING=False
             ansible-playbook -i ./.circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml --ssh-common-args='-o StrictHostKeyChecking=no'
-      
+     
+      - destroy_environment:
+          id: ${CIRCLE_WORKFLOW_ID:0:5}
+      - revert_migrations:
+          id: ${CIRCLE_WORKFLOW_ID:0:5}    
 
   smoke-test:
     docker:
@@ -338,7 +351,7 @@ jobs:
       - run:
           name: Frontend smoke test.
           command: |
-            URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-us-east-1.amazonaws.com/#/employees"            
+            URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:5}.s3-website-us-east-1.amazonaws.com/#/employees"            
             echo ${URL} 
             if curl -s ${URL} | grep "Welcome"
             then
@@ -346,7 +359,10 @@ jobs:
             else
               return 1
             fi
-
+      - destroy_environment:
+          id: ${CIRCLE_WORKFLOW_ID:0:5}
+      - revert_migrations:
+          id: ${CIRCLE_WORKFLOW_ID:0:5}    
 
   cloudfront-update:
     docker:
