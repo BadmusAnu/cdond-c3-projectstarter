@@ -377,12 +377,22 @@ jobs:
       - run:
           name: Update cloudfront distribution
           command: |   
+            
+            export OldWorkflowID=$(aws cloudformation \
+                    list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
+                    --no-paginate --output text)
+            echo OldWorkflowID: "${OldWorkflowID}"
+            
             aws cloudformation deploy \
               --template-file .circleci/files/cloudfront.yml \
-              --stack-name udapeople-cloudfront-prod \
+              --stack-name IntialStack \
               --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:5}" \
               --tags project=udapeople
-
+      
+      - persist_to_workspace:
+          root: .
+          paths:
+            - /
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:5}
       - revert_migrations:
@@ -392,13 +402,14 @@ jobs:
     docker:
       - image: amazon/aws-cli
     steps:
+      
+      - attach_workspace:
+          at: .
+      
       - run:
           name: Update cloudfront distribution
           command: |   
 
-            export OldWorkflowID=$(aws cloudformation \
-                    list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
-                    --no-paginate --output text)
             echo OldWorkflowID: "${OldWorkflowID}"
             echo CIRCLE_WORKFLOW_ID "${CIRCLE_WORKFLOW_ID:0:5}"
             # Fetch the stack names          
