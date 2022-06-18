@@ -400,6 +400,7 @@ jobs:
     steps:
             
       - run:
+          shell: /bin/bash 
           name: Update cloudfront distribution
           command: |   
             OldWorkflowID=$(curl --insecure  https://kvdb.io/HP8gxhJJprxXvN7j37pQp4/udacity)
@@ -408,7 +409,7 @@ jobs:
             if [[ "$CurrentWorkflowID" != "$OldWorkflowID" ]]
             then
               echo "$OldWorkflowID!=$CurrentWorkflowID => will delete old version"
-              aws s3 rm "s3://$udapeople-{OldWorkflowID}" --recursive
+              aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
               aws cloudformation delete-stack --stack-name "front-udapeople-${OldWorkflowID}"
               
             
@@ -453,5 +454,5 @@ workflows:
           requires: [deploy-backend, deploy-frontend]
       - cloudfront-update:
           requires: [smoke-test]
-      - cleanup:
-          requires: [cloudfront-update]
+#      - cleanup:
+#          requires: [cloudfront-update]
