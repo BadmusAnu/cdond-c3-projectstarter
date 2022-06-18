@@ -391,8 +391,6 @@ jobs:
       
       - persist_to_workspace:
           root: .
-          paths:
-            - /
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:5}
       - revert_migrations:
